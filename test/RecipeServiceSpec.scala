@@ -10,7 +10,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
- * Integration test for RecipeService
+ * Integration test for RecipeService and Embed
  */
 @RunWith(classOf[JUnitRunner])
 class RecipeServiceSpec extends Specification with EmbedConnection {
