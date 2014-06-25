@@ -1,7 +1,5 @@
 import com.github.athieriot._
 
-import org.junit.runner.RunWith
-import org.specs2.runner.JUnitRunner
 import org.specs2.mutable.Specification
 import reactivemongo.core.commands.LastError
 import services.RecipeService
@@ -10,9 +8,8 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
- * Integration test for RecipeService and Embed
+ * Integration test for RecipeService
  */
-@RunWith(classOf[JUnitRunner])
 class RecipeServiceSpec extends Specification with EmbedConnection {
   sequential
 
