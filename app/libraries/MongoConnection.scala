@@ -17,7 +17,7 @@ object MongoConnection  {
 
   def testConnection: DefaultDB = {
     val driver = new MongoDriver
-    val connection = driver.connection(List("localhost:12345"))
+    val connection = driver.connection("localhost:12345" :: Nil)
     connection("testDB")
   }
 
