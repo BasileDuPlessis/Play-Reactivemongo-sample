@@ -22,7 +22,12 @@ object Application extends Controller with MongoController {
     val query = BSONDocument()
 
     collection.find(query).cursor[Recipe].collect[List]().map( l => {
-        Ok("Recipes : " + l.map(r => r.name).mkString(",")).as("text/html")
+      Ok(
+        views.html.index(
+          title = "Mes recettes",
+          recipes = l
+        )
+      )
       }
     ).recover {
       case e =>

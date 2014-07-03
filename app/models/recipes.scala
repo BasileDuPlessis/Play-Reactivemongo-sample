@@ -1,5 +1,10 @@
 package models
 
+import utils.CustomMappings._
+
+import play.api.data.Form
+import play.api.data.Forms._
+import play.api.data.format.Formats._
 import reactivemongo.api._
 import reactivemongo.api.collections.default.BSONCollection
 import reactivemongo.bson.{BSONDocumentWriter, BSONDocument, BSONDocumentReader, BSONObjectID}
@@ -8,6 +13,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import reactivemongo.core.commands.LastError
 
 import scala.concurrent.Future
+
+
 
 
 /**
@@ -39,18 +46,36 @@ object Recipe {
       )
   }
 
+  val recipeForm = Form(
+    mapping(
+      "id" -> optional(of[BSONObjectID]),
+      "name" -> text
+    )(Recipe.apply)(Recipe.unapply)
+  )
+
   /**
-   * Create a recipe from a name
+   * Insert a recipe in DB
    */
-  def create(name: String): DefaultDB => Future[LastError] = {
-    db:DefaultDB => db[BSONCollection](collectionName).insert[Recipe](Recipe(None, name))
+  def insert(recipe: Recipe): DefaultDB => Future[Recipe] = {
+    db:DefaultDB => {
+      db[BSONCollection](collectionName).insert[Recipe](recipe).map {
+        l => recipe
+      }
+    }
   }
 
   /**
    * Read a recipe from name
    */
-  def readOne(name: String): DefaultDB => Future[Option[Recipe]]= {
+  def read(name: String): DefaultDB => Future[Option[Recipe]]= {
     db:DefaultDB => db[BSONCollection](collectionName).find(BSONDocument("name" -> name)).one[Recipe]
+  }
+
+  /**
+   * Read a recipe from id
+   */
+  def read(id: BSONObjectID): DefaultDB => Future[Option[Recipe]]= {
+    db:DefaultDB => db[BSONCollection](collectionName).find(BSONDocument("_id" -> id)).one[Recipe]
   }
 
 

@@ -2,27 +2,54 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-
-
-import libraries.MongoConnection._
+import reactivemongo.bson.BSONObjectID
+import utils.MongoConnection._
 
 import services.RecipeService
+import models.Recipe
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 
 object Recipes extends Controller {
 
-  def create(name: String) = Action.async {
-
-    withMongoConnection {
-      RecipeService.createRecipeIfNotExists(name)
-    } map {
-        l => Created(s"Recipe $name succesfully created with last error: $l")
-    } recover {
-      case e => Unauthorized(e.getMessage)
-    }
-
+  def index = Action {
+    Ok(views.html.recipes.add(Recipe.recipeForm))
   }
+
+  def view(id: String) = Action.async {
+    withMongoConnection {
+      BSONObjectID.parse(id) match {
+        case Success(bid) => Recipe.read(bid)
+        case Failure(e) => Future.failed(new Exception(s"$id is not valid"))
+      }
+    } map {
+      case Some(recipe: Recipe) => Ok(views.html.recipes.view(recipe))
+      case _ => NotFound(s"Recipe $id not found")
+    } recover {
+      case e => BadRequest(e.getMessage)
+    }
+  }
+
+
+  def create = Action.async { implicit request =>
+    Recipe.recipeForm.bindFromRequest.fold(
+      formWithErrors => Future.successful(BadRequest(views.html.recipes.add(formWithErrors))),
+      recipe => {
+        val id = BSONObjectID.generate
+        withMongoConnection {
+          RecipeService.createRecipeIfNotExists(recipe.copy(id = Some(id)))
+        } map {
+          recipe => Redirect(routes.Recipes.view(id.stringify))
+        } recover {
+          case e => BadRequest(e.getMessage)
+        }
+      }
+    )
+  }
+
 
 }

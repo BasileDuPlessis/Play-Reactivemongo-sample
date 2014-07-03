@@ -1,15 +1,16 @@
-name := "itsMyFood"
+name := """itsMyFood"""
 
 version := "1.0-SNAPSHOT"
 
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+lazy val root = (project in file(".")).enablePlugins(PlayScala)
+
+scalaVersion := "2.11.1"
+
+resolvers += "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
 libraryDependencies ++= Seq(
-  jdbc,
-  anorm,
   cache,
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.2",
-  "com.github.athieriot" %% "specs2-embedmongo" % "0.6.0"
+  ws,
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.akka23-SNAPSHOT",
+  "com.github.athieriot" %% "specs2-embedmongo" % "0.7.0"
 )
-
-play.Project.playScalaSettings

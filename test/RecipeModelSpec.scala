@@ -22,22 +22,23 @@ import scala.concurrent.{Await, Future}
  */
 class RecipeModelSpec extends Specification with Mockito {
 
-  "Recipe#create" should {
+  "Recipe#insert" should {
     "insert a new recipe in DB" in {
 
       val mockDefaultDB = mock[DefaultDB]
       val mockCollection = mock[BSONCollection]
+      val recipe = Recipe(None, "my super cake")
 
       when(
         mockDefaultDB[BSONCollection](anyString, any)(any)
       ) thenReturn mockCollection
 
       when(
-        mockCollection.insert[Recipe](Matchers.eq(Recipe(None, "my super cake")), any)(any, any)
+        mockCollection.insert[Recipe](Matchers.eq(recipe), any)(any, any)
       ) thenReturn Future(new LastError(true, None, None, None, None, 0, false))
 
       Await.result(
-        Recipe.create("my super cake")(mockDefaultDB), Duration.Inf
+        Recipe.insert(recipe)(mockDefaultDB), Duration.Inf
       ).ok must beTrue
 
     }
@@ -48,6 +49,7 @@ class RecipeModelSpec extends Specification with Mockito {
 
       val mockDefaultDB = mock[DefaultDB]
       val mockCollection = mock[BSONCollection]
+      val recipe = Recipe(None, "my super cake")
 
       when(
         mockDefaultDB[BSONCollection](anyString, any)(any)
@@ -61,10 +63,10 @@ class RecipeModelSpec extends Specification with Mockito {
 
       when(
         genericQueryBuilder.one[Recipe](any, any)
-      ) thenReturn Future(Some(Recipe(None, "my super cake")))
+      ) thenReturn Future(Some(recipe))
 
       Await.result(
-        Recipe.readOne("my super cake")(mockDefaultDB), Duration.Inf
+        Recipe.read("my super cake")(mockDefaultDB), Duration.Inf
       ) must beSome[Recipe]
 
     }
