@@ -43,7 +43,7 @@ object Recipes extends Controller {
         withMongoConnection {
           RecipeService.createRecipeIfNotExists(recipe.copy(id = Some(id)))
         } map {
-          recipe => Redirect(routes.Recipes.view(id.stringify))
+          lastError => Redirect(routes.Recipes.view(id.stringify))
         } recover {
           case e => BadRequest(e.getMessage)
         }

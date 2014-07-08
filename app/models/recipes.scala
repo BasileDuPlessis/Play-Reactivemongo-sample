@@ -56,11 +56,9 @@ object Recipe {
   /**
    * Insert a recipe in DB
    */
-  def insert(recipe: Recipe): DefaultDB => Future[Recipe] = {
+  def insert(recipe: Recipe): DefaultDB => Future[LastError] = {
     db:DefaultDB => {
-      db[BSONCollection](collectionName).insert[Recipe](recipe).map {
-        l => recipe
-      }
+      db[BSONCollection](collectionName).insert[Recipe](recipe)
     }
   }
 
