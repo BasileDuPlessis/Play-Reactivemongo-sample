@@ -1,24 +1,14 @@
-@(recipes: List[Recipe], title: String)
+@(listRecipes: List[Recipe])
 
-<!DOCTYPE html>
+@main("All recipes") {
 
-<html>
-<head>
-    <title>@title</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-    </head>
-    <body>
     <h1>All recipes</h1>
     <ul>
-    @for(r <- recipes) {
+    @for(r <- listRecipes) {
         @for(id <- r.id) {
             <li><a href="/recipe/@id.stringify">@r.name</a></li>
         }
     }
     </ul>
 
-    @common.footer
-
-    </body>
-</html>
+}

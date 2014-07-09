@@ -1,7 +1,7 @@
-import reactivemongo.api.DefaultDB
+import reactivemongo.api.{Cursor, DefaultDB}
 import reactivemongo.api.collections.GenericQueryBuilder
 import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.bson.{BSONDocumentReader, BSONDocumentWriter, BSONDocument}
+import reactivemongo.bson.{BSONObjectID, BSONDocumentReader, BSONDocumentWriter, BSONDocument}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -23,7 +23,7 @@ import scala.concurrent.{Await, Future}
 class RecipeModelSpec extends Specification with Mockito {
 
   "Recipe#insert" should {
-    "insert a new recipe in DB" in {
+    "call insert on collection" in {
 
       val mockDefaultDB = mock[DefaultDB]
       val mockCollection = mock[BSONCollection]
@@ -39,14 +39,50 @@ class RecipeModelSpec extends Specification with Mockito {
 
       Await.result(
         Recipe.insert(recipe)(mockDefaultDB), Duration.Inf
-      ).ok must beTrue
+      )
+
+      there was one(mockCollection).insert[Recipe](recipe)
 
     }
   }
 
-  "Recipe#readOne" should {
-    "read one recipe from DB" in {
+  "Recipe#readAll" should {
+    "call find with empty parameters on collection" in {
 
+      val mockDefaultDB = mock[DefaultDB]
+      val mockCollection = mock[BSONCollection]
+      val mockCursor = mock[Cursor[Recipe]]
+      val genericQueryBuilder = mock[GenericQueryBuilder[BSONDocument, BSONDocumentReader, BSONDocumentWriter]]
+      val recipe = Recipe(None, "my super cake")
+
+      when(
+        mockDefaultDB[BSONCollection](anyString, any)(any)
+      ) thenReturn mockCollection
+
+      when(
+        mockCollection.find(Matchers.eq(BSONDocument()))(any)
+      ) thenReturn genericQueryBuilder
+
+      when(
+        genericQueryBuilder.cursor[Recipe](any, any)
+      ) thenReturn mockCursor
+
+      when(
+        mockCursor.collect[List](any, any)(any, any)
+      ) thenReturn Future(List(recipe))
+
+      Await.result(
+        Recipe.readAll(mockDefaultDB), Duration.Inf
+      )
+
+      there was one(mockCollection).find(BSONDocument())
+      there was one(mockCursor).collect[List]()
+
+    }
+  }
+
+  "Recipe#readOne(String)" should {
+    "call find with name parameter on collection" in {
       val mockDefaultDB = mock[DefaultDB]
       val mockCollection = mock[BSONCollection]
       val recipe = Recipe(None, "my super cake")
@@ -58,7 +94,7 @@ class RecipeModelSpec extends Specification with Mockito {
       val genericQueryBuilder = mock[GenericQueryBuilder[BSONDocument, BSONDocumentReader, BSONDocumentWriter]]
 
       when(
-        mockCollection.find(any)(any)
+        mockCollection.find(Matchers.eq(BSONDocument("name" -> recipe.name)))(any)
       ) thenReturn genericQueryBuilder
 
       when(
@@ -66,9 +102,39 @@ class RecipeModelSpec extends Specification with Mockito {
       ) thenReturn Future(Some(recipe))
 
       Await.result(
-        Recipe.read("my super cake")(mockDefaultDB), Duration.Inf
-      ) must beSome[Recipe]
+        Recipe.read(recipe.name)(mockDefaultDB), Duration.Inf
+      )
 
+      there was one(mockCollection).find(BSONDocument("name" -> recipe.name))
+    }
+  }
+
+  "Recipe#readOne(BSONObjectID)" should {
+    "call find with id parameter on collection" in {
+      val mockDefaultDB = mock[DefaultDB]
+      val mockCollection = mock[BSONCollection]
+      val id = BSONObjectID.generate
+      val recipe = Recipe(Some(id), "my super cake")
+
+      when(
+        mockDefaultDB[BSONCollection](anyString, any)(any)
+      ) thenReturn mockCollection
+
+      val genericQueryBuilder = mock[GenericQueryBuilder[BSONDocument, BSONDocumentReader, BSONDocumentWriter]]
+
+      when(
+        mockCollection.find(Matchers.eq(BSONDocument("_id" -> id)))(any)
+      ) thenReturn genericQueryBuilder
+
+      when(
+        genericQueryBuilder.one[Recipe](any, any)
+      ) thenReturn Future(Some(recipe))
+
+      Await.result(
+        Recipe.read(id)(mockDefaultDB), Duration.Inf
+      )
+
+      there was one(mockCollection).find(BSONDocument("_id" -> id))
     }
   }
 

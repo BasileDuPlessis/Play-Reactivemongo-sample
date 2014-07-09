@@ -76,5 +76,12 @@ object Recipe {
     db:DefaultDB => db[BSONCollection](collectionName).find(BSONDocument("_id" -> id)).one[Recipe]
   }
 
+  /**
+   * Read all recipes
+   */
+  def readAll: DefaultDB => Future[List[Recipe]] = {
+    db:DefaultDB => db[BSONCollection](collectionName).find(BSONDocument()).cursor[Recipe].collect[List]()
+  }
+
 
 }
