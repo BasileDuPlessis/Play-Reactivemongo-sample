@@ -22,10 +22,7 @@ object Recipes extends Controller {
 
   def view(id: String) = Action.async {
     withMongoConnection {
-      BSONObjectID.parse(id) match {
-        case Success(bid) => Recipe.read(bid)
-        case Failure(e) => Future.failed(new Exception(s"$id is not valid"))
-      }
+      RecipeService.readFromId(id)
     } map {
       case Some(recipe: Recipe) => Ok(views.html.recipes.view(recipe))
       case _ => NotFound(s"Recipe $id not found")

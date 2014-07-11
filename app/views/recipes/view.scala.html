@@ -1,21 +1,18 @@
 @(recipe: Recipe)
 
-<!DOCTYPE html>
+@main(recipe.name) {
 
-<html>
-<head>
-    <title>@recipe.name</title>
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
-    </head>
-    <body>
     <h1>@recipe.name</h1>
 
-    @helper.form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
-        <input type="file" name="image" />
-        <input type="hidden" />
-        <input type="submit" />
+    @for(picture <- recipe.pictures) {
+        <img width="100" src="@routes.Application.serveFile(picture.stringify)" />
     }
 
-    </body>
-</html>
+    @for(id <- recipe.id) {
+        @helper.form(action = routes.Application.upload(id.stringify), 'enctype -> "multipart/form-data") {
+            <input type="file" name="image" multiple="multiple" />
+            <input type="submit" />
+        }
+    }
+
+}

@@ -6,7 +6,8 @@
 GET     /                           controllers.Application.index
 
 # Files
-POST    /upload                     controllers.Application.upload
+POST   /upload/:id                 controllers.Application.upload(id)
+GET    /file/:id                   controllers.Application.serveFile(id)
 
 # Recipes
 GET     /new                        controllers.Recipes.index

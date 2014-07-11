@@ -1,13 +1,13 @@
 package models
 
-import utils.CustomMappings._
+import _root_.utils.CustomMappings._
 
 import play.api.data.Form
 import play.api.data.Forms._
 import play.api.data.format.Formats._
 import reactivemongo.api._
 import reactivemongo.api.collections.default.BSONCollection
-import reactivemongo.bson.{BSONDocumentWriter, BSONDocument, BSONDocumentReader, BSONObjectID}
+import reactivemongo.bson._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import reactivemongo.core.commands.LastError
@@ -23,7 +23,8 @@ import scala.concurrent.Future
 
 case class Recipe(
   id: Option[BSONObjectID],
-  name: String
+  name: String,
+  pictures: List[BSONObjectID] = List[BSONObjectID]()
 )
 
 object Recipe {
@@ -34,7 +35,8 @@ object Recipe {
     def read(doc: BSONDocument): Recipe =
       Recipe(
         doc.getAs[BSONObjectID]("_id"),
-        doc.getAs[String]("name").get
+        doc.getAs[String]("name").get,
+        doc.getAs[List[BSONObjectID]]("pictures").get
       )
   }
 
@@ -42,14 +44,16 @@ object Recipe {
     def write(recipe: Recipe): BSONDocument =
       BSONDocument(
         "_id" -> recipe.id.getOrElse(BSONObjectID.generate),
-        "name" -> recipe.name
+        "name" -> recipe.name,
+        "pictures" -> recipe.pictures
       )
   }
 
   val recipeForm = Form(
     mapping(
       "id" -> optional(of[BSONObjectID]),
-      "name" -> text
+      "name" -> text,
+      "pictures" -> ignored(List[BSONObjectID]())
     )(Recipe.apply)(Recipe.unapply)
   )
 
@@ -81,6 +85,13 @@ object Recipe {
    */
   def readAll: DefaultDB => Future[List[Recipe]] = {
     db:DefaultDB => db[BSONCollection](collectionName).find(BSONDocument()).cursor[Recipe].collect[List]()
+  }
+
+  /**
+   * Update recipe
+   */
+  def update(id: BSONObjectID, modifier: BSONDocument): DefaultDB => Future[LastError]= {
+    db:DefaultDB => db[BSONCollection](collectionName).update(BSONDocument("_id" -> id), modifier)
   }
 
 

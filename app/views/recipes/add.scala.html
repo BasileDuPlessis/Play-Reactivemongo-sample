@@ -1,15 +1,10 @@
 @(recipeForm: Form[Recipe])
 
-<!DOCTYPE html>
-<html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-@helper.form(action = routes.Recipes.create) {
-    @helper.inputText(recipeForm("name"))
-    <input type="submit" />
+@main("Add recipe") {
+
+    @helper.form(action = routes.Recipes.create) {
+        @helper.inputText(recipeForm("name"))
+        <input type="submit" />
+    }
+
 }
-</body>
-</html>

@@ -4,9 +4,11 @@ import libraries.Di._
 import libraries.Di.Reader
 
 import models.Recipe
-import reactivemongo.api.DefaultDB
+import reactivemongo.api.{Cursor, DefaultDB}
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import reactivemongo.api.gridfs.{ReadFile, GridFS}
+import reactivemongo.bson._
 import reactivemongo.core.commands.LastError
 import scala.concurrent.Future
 
@@ -25,4 +27,27 @@ object RecipeService {
       result <- recipeInDB filter (_ == None) map (_ => Recipe.insert(recipe))
     } yield result
 
+
+  /**
+   * Try to parse recipe id as a BSONObjectID and add pictures to this recipe
+   */
+  def addPicturesToRecipe(id: String, pictures: List[BSONValue]): Reader[DefaultDB, Future[LastError]] =
+    for {
+      tryId <- pure(BSONObjectID.parse(id))
+      result <- tryId map {oid => Recipe.update(oid, BSONDocument(
+        "$push" -> BSONDocument("pictures" -> BSONDocument("$each" -> BSONArray(pictures)))
+       ))}
+    } yield result
+
+  /**
+   * Try to parse recipe id as a BSONObjectID and read recipe
+   */
+  def readFromId(id: String): Reader[DefaultDB, Future[Option[Recipe]]] =
+    for {
+      tryId <- pure(BSONObjectID.parse(id))
+      result <- tryId map {oid => Recipe.read(oid)}
+    } yield result
+
+
 }
+
