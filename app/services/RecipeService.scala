@@ -4,10 +4,9 @@ import libraries.Di._
 import libraries.Di.Reader
 
 import models.Recipe
-import reactivemongo.api.{Cursor, DefaultDB}
+import reactivemongo.api.DefaultDB
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import reactivemongo.api.gridfs.{ReadFile, GridFS}
 import reactivemongo.bson._
 import reactivemongo.core.commands.LastError
 import scala.concurrent.Future

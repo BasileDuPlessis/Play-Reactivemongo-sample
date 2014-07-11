@@ -11,7 +11,6 @@ import models.Recipe
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 
 object Recipes extends Controller {
