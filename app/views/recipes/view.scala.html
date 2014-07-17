@@ -5,7 +5,7 @@
     <h1>@recipe.name</h1>
 
     @for(picture <- recipe.pictures) {
-        <img width="100" src="@routes.Application.serveFile(picture.stringify)" />
+        <img width="250" src="@routes.Application.serveFile(picture.stringify)" />
     }
 
     @for(id <- recipe.id) {

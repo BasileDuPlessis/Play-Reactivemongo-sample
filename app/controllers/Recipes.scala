@@ -3,9 +3,9 @@ package controllers
 import play.api._
 import play.api.mvc._
 import reactivemongo.bson.BSONObjectID
+import services.RecipeService
 import utils.MongoConnection._
 
-import services.RecipeService
 import models.Recipe
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -14,6 +14,7 @@ import scala.concurrent.Future
 
 
 object Recipes extends Controller {
+
 
   def index = Action {
     Ok(views.html.recipes.add(Recipe.recipeForm))
