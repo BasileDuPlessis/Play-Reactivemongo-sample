@@ -15,10 +15,12 @@ POST    /create                     controllers.Recipes.create
 GET     /recipe/:id                 controllers.Recipes.view(id)
 
 # Login page
-GET     /login                      controllers.User.login
-GET     /logout                     controllers.User.logout
+GET     /login                      controllers.CustomLoginController.login
+GET     /logout                     controllers.CustomLoginController.logout
 
+# Provider entry points
+GET     /authenticate/:provider     controllers.CustomProviderController.authenticate(provider)
+POST    /authenticate/:provider     controllers.CustomProviderController.authenticateByPost(provider)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
-
